@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Winx Magic Clicker</title>
+
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    background-image: url("https://wallpapercave.com/wp/wp2832259.jpg");
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', sans-serif;
+    color: white;
+  }
+
+.overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 160, 220, 0.75),
+    rgba(150, 80, 255, 0.75)
+  );
+  padding: 40px;
+  border-radius: 30px;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 25px 50px rgba(180, 80, 255, 0.6);
+}
+
+
+
+
+  h1 {
+    margin-bottom: 10px;
+    text-shadow: 0 0 15px #ff99ff;
+  }
+
+  .score {
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
+
+  .wings {
+    width: 240px;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+    filter: drop-shadow(0 0 20px #ffccff);
+  }
+
+  .wings:active {
+    transform: scale(0.92);
+  }
+
+  .magic {
+    position: absolute;
+    pointer-events: none;
+    font-size: 24px;
+    animation: sparkle 1s ease-out forwards;
+  }
+
+  @keyframes sparkle {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-70px) scale(1.6);
+    }
+  }
+
+  .hint {
+    font-size: 14px;
+    opacity: 0.85;
+    margin-top: 10px;
+  }
+  
+@media (max-width: 300px) {
+  .overlay {
+    width: 90%;
+    padding: 25px;
+    border-radius: 22px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  .score {
+    font-size: 22px;
+  }
+
+  .wings {
+    width: 180px;
+  }
+
+  .hint {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 1000px) {
+  .overlay {
+    max-width: 500px;
+  }
+
+  .wings {
+    width: 260px;
+  }
+}
+.upgrade-btn {
+  margin-top: 15px;
+  padding: 12px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ffd6ff, #c77dff);
+  color: #4a004a;
+  box-shadow: 0 8px 20px rgba(200, 100, 255, 0.5);
+  transition: transform 0.1s, opacity 0.2s;
+}
+
+.upgrade-btn:active {
+  transform: scale(0.95);
+}
+
+.upgrade-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 8px 20px rgba(200, 100, 255, 0.5);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 12px 25px rgba(255, 150, 255, 0.8);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 8px 20px rgba(200, 100, 255, 0.5);
+  }
+}
+
+
+</style>
+</head>
+
+<body>
+
+<div class="overlay">
+  <h1>🧚‍♀️ Winx Magic Clicker</h1>
+  <div class="score">Магия: <span id="count">0</span></div>
+<div class="score">🏆 Рекорд: <span id="best">0</span></div>
+
+<button class="upgrade-btn" id="upgradeBtn">
+  ✨ Upgrade (+1 за клик) — <span id="price">10</span>
+</button>
+
+  <img
+    src="https://www.pngkey.com/png/full/294-2941758_stella-bloomix-wings-by-winx1243-d77ih3u-stella-winx.png"
+    class="wings"
+    id="wings"
+    alt="Winx Wings"
+  >
+
+  <div class="hint">Кликай на крылья ✨</div>
+</div>
+
+<script>
+  let count = Number(localStorage.getItem("winxMagic")) || 0;
+  let best = Number(localStorage.getItem("winxBest")) || 0;
+  let power = Number(localStorage.getItem("winxPower")) || 1;
+  let price = Number(localStorage.getItem("winxPrice")) || 10;
+
+  const countEl = document.getElementById("count");
+  const bestEl = document.getElementById("best");
+  const wings = document.getElementById("wings");
+  const upgradeBtn = document.getElementById("upgradeBtn");
+  const priceEl = document.getElementById("price");
+
+  function updateUI() {
+    countEl.textContent = count;
+    bestEl.textContent = best;
+    priceEl.textContent = price;
+    upgradeBtn.disabled = count < price;
+  }
+
+  updateUI();
+
+  wings.addEventListener("click", (e) => {
+    count += power;
+
+    if (count > best) {
+      best = count;
+      localStorage.setItem("winxBest", best);
+    }
+
+    localStorage.setItem("winxMagic", count);
+    updateUI();
+
+    const spark = document.createElement("div");
+    spark.className = "magic";
+    spark.textContent = "✨";
+    spark.style.left = e.clientX + "px";
+    spark.style.top = e.clientY + "px";
+    document.body.appendChild(spark);
+
+    setTimeout(() => spark.remove(), 1000);
+  });
+
+  upgradeBtn.addEventListener("click", () => {
+    if (count >= price) {
+      count -= price;
+      power++;
+      price = Math.floor(price * 1.7);
+
+      localStorage.setItem("winxMagic", count);
+      localStorage.setItem("winxPower", power);
+      localStorage.setItem("winxPrice", price);
+
+      updateUI();
+    }
+  });
+</script>
+
+
+</body>
+</html>
